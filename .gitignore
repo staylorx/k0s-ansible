@@ -9,3 +9,9 @@ inventory/*
 inventory/*/artifacts/
 multipass-cloud-init.yml
 tools/inventory.yml
+poetry.lock
+distros/
+k9s_linux_amd64.deb
+.python-version
+/tools/artifacts/
+

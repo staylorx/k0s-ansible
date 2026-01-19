@@ -1,0 +1,65 @@
+---
+# run this first with --ask-pass because the public key won't be there at first...
+# then it can be run using ssh pub key as normal.
+- hosts: all
+  gather_facts: false
+  become: true
+  vars:
+    ssh_public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  tasks:
+  - name: Set hostname
+    hostname:
+      name: "{{ inventory_hostname }}"
+
+  - name: update apt
+    ansible.builtin.apt:
+      update_cache: yes
+      upgrade: dist
+
+  - name: add user
+    ansible.builtin.user:
+      name: k0s
+      comment: k0s
+      create_home: yes
+      groups: sudo
+      append: yes
+
+  - lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: '^%sudo'
+      line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+  - name: make directory
+    file:
+      path: "/home/{{ item }}/.ssh"
+      state: directory
+      owner: "{{ item }}"
+      group: "{{ item }}"
+    loop:
+      - installer
+      - k0s
+
+  - name: create empty file
+    file:
+      path: "/home/{{ item }}/.ssh/authorized_keys"
+      state: touch
+      owner: "{{ item }}"
+      group: "{{ item }}"
+    loop:
+      - installer
+      - k0s
+
+  - name: put pub key
+    lineinfile:
+      path: "/home/{{ item }}/.ssh/authorized_keys"
+      line: "{{ ssh_public_key }}"
+    loop:
+      - installer
+      - k0s
+
+  - name: Unconditionally reboot the machine with all defaults
+    become: true
+    ansible.builtin.reboot:
+      reboot_timeout: 600

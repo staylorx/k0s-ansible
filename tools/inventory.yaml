@@ -1,0 +1,28 @@
+---
+all:
+  children:
+    initial_controller:
+      hosts:
+        km1:
+    controller:
+      hosts:
+        km2:
+        km3:
+    worker:
+      hosts:
+        kw1:
+        kw2:
+        kw3:
+  hosts:
+    km1:
+      ansible_host: 192.168.1.146
+    km2:
+      ansible_host: 192.168.1.250
+    km3:
+      ansible_host: 192.168.1.124
+    kw1:
+      ansible_host: 192.168.1.106
+    kw2:
+      ansible_host: 192.168.1.147
+    kw3:
+      ansible_host: 192.168.1.161
